@@ -51,7 +51,7 @@ class AuthController extends Controller
         $user = User::whereEmail($request->email)->first();
         if($user->email && Hash::check($request->password, $user->password))
         {
-            $token = $user->createToken($request->name, [], now()->addMinutes(60))->plainTextToken;
+            $token = $user->createToken($request->email, [], now()->addMinutes(60))->plainTextToken;
             return response()->json([
                 'message' => 'User logged in successfully',
                 'token' => $token

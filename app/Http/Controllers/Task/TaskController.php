@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests\TaskRequest;
 use App\Http\Controllers\Controller;
 use Illuminate\Auth\Events\Validated;
+use Illuminate\Support\Facades\Validator;
 
 class TaskController extends Controller
 {
@@ -30,8 +31,14 @@ class TaskController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(TaskRequest $request)
+    public function store(Request $request)
     {
+        $request->validate([
+            'title' => 'required|string|max:60',
+            'status' => 'required|string',
+            'user_id' => 'required|exists:users,id',
+        ]);
+
         $task = Task::create($request->validated());
         if (!$task) {
             return response()->json([
@@ -45,18 +52,23 @@ class TaskController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      */
-    public function update(TaskRequest $request, string $id)
+    public function update(Request $request, string $id)
     {
+        $validator = Validator::make($request->all(), [
+            'title' => 'required|string|max:60',
+            'status' => 'required|string',
+            'user_id' => 'required|exists:users,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()->all(),
+            ], 422);
+        }
+
         $task = Task::find($id);
         if (!$task) {
             return response()->json([
@@ -64,7 +76,7 @@ class TaskController extends Controller
             ], 404);
         }
 
-        $task->update($request->except(['_method']));
+        $task->update($request->all());
         return response()->json([
             'message' => 'Task successfully updated',
             'task' => $task,

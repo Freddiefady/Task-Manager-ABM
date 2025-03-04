@@ -14,4 +14,9 @@ Route::post('auth/register', [AuthController::class, 'register']);
 Route::post('auth/login', [AuthController::class, 'login']);
 Route::delete('auth/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 // Tasks Routes
-Route::apiResource('tasks', TaskController::class)->middleware('auth:sanctum');
+Route::prefix('tasks')->controller(TaskController::class)->middleware('auth:sanctum')->group(function () {
+    Route::get('/', 'index');
+    Route::post('/', 'store');
+    Route::put('/{id}', 'update');
+    Route::delete('/{id}', 'destroy');
+});
